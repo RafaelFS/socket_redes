@@ -7,6 +7,7 @@ void *producer(void *);
 void *consumer(void *);
 
 char texto[] = "Texto a ser escrito no buffer para testes...";
+FILE *fr;
 
 #define check(A,msg) \
   if ((A)) { \
@@ -33,21 +34,29 @@ int main()
 
 void *producer(void * d)
 {
+  char ch;
   buffer *pb = (buffer *)d;
-  for (int i = 0; i < sizeof(texto) - 1; ++i)
+  fr = fopen ("disco", "rt");
+  ch = fgetc(fr);
+  while( ch != EOF )
   {
-    printf("Producer: %c\n", texto[i]);
-    pb->insert(pb, texto[i]);
+    printf("Producer: %c\n", ch);
+    pb->insert(pb, ch);
+    ch = fgetc(fr); 
   }
+  pb->insert(pb, ch);
+  fclose(fr);  /* close the file prior to exiting the routine */
   return 0;
 }
 void *consumer(void *d)
 {
+  char ch;
   buffer *pb = (buffer *)d;
-  for (int i = 0; i < sizeof(texto) - 1; ++i)
+  ch = pb->get(pb);
+  while( ch != EOF )
   {
-    char c = pb->get(pb);
-    printf("\t\tConsumer: %c\n", c);
+    printf("\t\tConsumer: %c\n", ch);
+    ch = pb->get(pb);
   }
   return 0;
 }
